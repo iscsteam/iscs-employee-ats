@@ -1,0 +1,12 @@
+numpy
+pandas
+seaborn
+matplotlib
+plotly
+dash
+dash-bootstrap-components
+ipywidgets
+psycopg2-binary
+uvicorn
+waitress
+pathlib
