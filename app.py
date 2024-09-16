@@ -18,9 +18,12 @@ import uvicorn
 from waitress import serve
 import dash
 from pathlib import Path
-
 #database imports
 import psycopg2
+import warnings
+# Ignore all warnings
+warnings.filterwarnings("ignore")
+
 
 #connect to database function
 # Define your connection parameters
