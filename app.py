@@ -23,6 +23,16 @@ import psycopg2
 import warnings
 # Ignore all warnings
 warnings.filterwarnings("ignore")
+from dash import Dash, html
+from flask import Flask, jsonify
+
+# Create a Flask server instance
+server = Flask(__name__)
+
+# Define the health check endpoint
+@server.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({"status": "ok"}), 200
 
 
 #connect to database function
