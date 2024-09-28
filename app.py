@@ -976,63 +976,64 @@ def employee_page_layout(employee_name,table_data,
 
 
 
-    # KPI Boxes
-    html.Div([
+            # KPI Boxes
         html.Div([
-            html.H3(str(len(late_logins_df)), style={'color': '#f6c23e'}),
-            html.P('No of Late Logins', style={'color': '#f8f9fa'}),
-        ], style={'background-color': '#2e2e2e', 'padding': '20px', 'border-radius': '10px', 'width': '200px', 'margin': '10px'}),
-        
-        html.Div([
-            html.H3(str(len(late_logout_df)), style={'color': '#e74a3b'}),
-            html.P('No of Early Logouts', style={'color': '#f8f9fa'}),
-        ], style={'background-color': '#2e2e2e', 'padding': '20px', 'border-radius': '10px', 'width': '200px', 'margin': '10px'}),
-        
-        html.Div([
-            html.H3(str(len(long_duration_df)), style={'color': '#36b9cc'}),
-            html.P('No of Short Office Durations', style={'color': '#f8f9fa'}),
-        ], style={'background-color': '#2e2e2e', 'padding': '20px', 'border-radius': '10px', 'width': '200px', 'margin': '10px'}),
-        
-        html.Div([
-            html.H3(str(len(break_duration_df)), style={'color': '#1cc88a'}),
-            html.P('No of Large Break Durations', style={'color': '#f8f9fa'}),
-        ], style={'background-color': '#2e2e2e', 'padding': '20px', 'border-radius': '10px', 'width': '200px', 'margin': '10px'}),
-    ], style={'display': 'flex', 'justify-content': 'center'}),
+            html.Div([
+                html.H3(id='late-logins-count', children=str(len(late_logins_df)), style={'color': '#f6c23e'}),
+                html.P('No of Late Logins', style={'color': '#f8f9fa'}),
+            ], id='late-logins-box', style={'background-color': '#2e2e2e', 'padding': '20px', 'border-radius': '10px', 'width': '200px', 'margin': '10px'}),
+            
+            html.Div([
+                html.H3(id='early-logouts-count', children=str(len(late_logout_df)), style={'color': '#e74a3b'}),
+                html.P('No of Early Logouts', style={'color': '#f8f9fa'}),
+            ], id='early-logouts-box', style={'background-color': '#2e2e2e', 'padding': '20px', 'border-radius': '10px', 'width': '200px', 'margin': '10px'}),
+            
+            html.Div([
+                html.H3(id='short-durations-count', children=str(len(long_duration_df)), style={'color': '#36b9cc'}),
+                html.P('No of Short Office Durations', style={'color': '#f8f9fa'}),
+            ], id='short-durations-box', style={'background-color': '#2e2e2e', 'padding': '20px', 'border-radius': '10px', 'width': '200px', 'margin': '10px'}),
+            
+            html.Div([
+                html.H3(id='large-breaks-count', children=str(len(break_duration_df)), style={'color': '#1cc88a'}),
+                html.P('No of Large Break Durations', style={'color': '#f8f9fa'}),
+            ], id='large-breaks-box', style={'background-color': '#2e2e2e', 'padding': '20px', 'border-radius': '10px', 'width': '200px', 'margin': '10px'}),
+        ], style={'display': 'flex', 'justify-content': 'center'}),
 
-    # Summary DataTable
-    dash_table.DataTable(
-        data=data1,
-        columns=[
-            {'name': 'Metric', 'id': 'Metric'},
-            {'name': 'Value', 'id': 'Value'},
-            {'name': 'Benchmark', 'id': 'Benchmark'}
-        ],
-        style_table={'width': '60%', 'margin': 'auto', 'margin-top': '20px'},
-        style_header={
-            'backgroundColor': '#2e2e2e',
-            'fontWeight': 'bold',
-            'fontSize': '18px',
-            'color': '#f8f9fa'
-        },
-        style_cell={
-            'padding': '10px',
-            'backgroundColor': '#1c1c1c',
-            'color': '#f8f9fa',
-            'border': '1px solid #444'
-        },
-        style_data_conditional=[
-            {
-                'if': {'filter_query': '{Metric} contains "Late Logins" and {Value} > "8"'},
-                'backgroundColor': '#e74a3b',
-                'color': 'white',
+        # Summary DataTable
+        dash_table.DataTable(
+            id='summary-data-table',  # Unique ID for the DataTable
+            data=data1,
+            columns=[
+                {'name': 'Metric', 'id': 'Metric'},
+                {'name': 'Value', 'id': 'Value'},
+                {'name': 'Benchmark', 'id': 'Benchmark'}
+            ],
+            style_table={'width': '60%', 'margin': 'auto', 'margin-top': '20px'},
+            style_header={
+                'backgroundColor': '#2e2e2e',
+                'fontWeight': 'bold',
+                'fontSize': '18px',
+                'color': '#f8f9fa'
             },
-            {
-                'if': {'filter_query': '{Metric} contains "Late Logins" and {Value} <= "8"'},
-                'backgroundColor': '#1cc88a',
-                'color': 'white',
-            }
-        ]
-    ),
+            style_cell={
+                'padding': '10px',
+                'backgroundColor': '#1c1c1c',
+                'color': '#f8f9fa',
+                'border': '1px solid #444'
+            },
+            style_data_conditional=[
+                {
+                    'if': {'filter_query': '{Metric} contains "Late Logins" and {Value} > "8"'},
+                    'backgroundColor': '#e74a3b',
+                    'color': 'white',
+                },
+                {
+                    'if': {'filter_query': '{Metric} contains "Late Logins" and {Value} <= "8"'},
+                    'backgroundColor': '#1cc88a',
+                    'color': 'white',
+                }
+            ]
+        ),
 
             # Break Duration Graph
              dcc.Graph(
@@ -1124,26 +1125,6 @@ def update_table(month_name):
     
 )
 
-# def display_page(pathname, search):
-#     if pathname.startswith('/employee/'):
-#         employee_name = pathname.split('/')[-1]
-#         default_month = daily_logs['month_name'].unique()[0]  # Get the default month (you might want to fetch this differently)
-#         table_data = table_data_daily(employee_name, default_month)  # Get table data using default month
-#         return employee_page_layout(employee_name, table_data)  # Pass table_data
-#     else:
-#         return main_page_layout()
-# @app.callback(
-#     Output('employee-table', 'data'),
-#     [Input('break-month-dropdown', 'value')],
-#     [State('url', 'pathname')]
-# )
-# def update_employee_table(month_name, pathname):
-#     if pathname.startswith('/employee/'):
-#         employee_name = pathname.split('/')[-1]
-#         table_data = table_data_daily(employee_name, month_name)
-#         return table_data.to_dict('records')
-#     return []
-# Function to display the correct page based on URL pathname
 def display_page(pathname, search):
     if pathname.startswith('/employee/'):
         employee_name = pathname.split('/')[-1]  # Extract employee name from URL
@@ -1159,23 +1140,53 @@ def display_page(pathname, search):
         return main_page_layout()
 
 # Callback function to update the employee table when a new month is selected
+# @app.callback(
+#     Output('employee-table', 'data'),
+#     [Input('break-month-dropdown', 'value')],
+#     [State('url', 'pathname')]
+# )
+
+# def update_employee_table(month_name, pathname):
+#     if pathname.startswith('/employee/'):
+#         employee_name = pathname.split('/')[-1]  # Extract employee name from URL
+
+#         # If no month is selected, default to the first available month in the dropdown
+#         if not month_name:
+#             month_name = daily_logs['month_name'].unique()[0]
+
+#         table_data = table_data_daily(employee_name, month_name)  # Fetch table data for the selected month
+
+#         return table_data.to_dict('records')  # Return the table data in dictionary format
+#     return []
 @app.callback(
-    Output('employee-table', 'data'),
+    [Output('employee-table', 'data'),
+     Output('summary-data-table', 'data'),
+     Output('late-logins-count', 'children'),
+     Output('early-logouts-count', 'children'),
+     Output('short-durations-count', 'children'),
+     Output('large-breaks-count', 'children')],
     [Input('break-month-dropdown', 'value')],
     [State('url', 'pathname')]
 )
-def update_employee_table(month_name, pathname):
+def update_metrics_and_table(month_name, pathname):
     if pathname.startswith('/employee/'):
-        employee_name = pathname.split('/')[-1]  # Extract employee name from URL
+        employee_name = pathname.split('/')[-1]
+        
+        # Get the table data for the selected month
+        table_data = table_data_daily(employee_name, month_name)
 
-        # If no month is selected, default to the first available month in the dropdown
-        if not month_name:
-            month_name = daily_logs['month_name'].unique()[0]
+        # Get the metrics based on the employee and month
+        _, late_logins_df, late_logout_df, long_duration_df, break_duration_df, data1 = process_employee_metrics(employee_name, month_name)
 
-        table_data = table_data_daily(employee_name, month_name)  # Fetch table data for the selected month
-
-        return table_data.to_dict('records')  # Return the table data in dictionary format
-    return []
+        return (
+            table_data.to_dict('records'),
+            data1,
+            str(len(late_logins_df)),
+            str(len(late_logout_df)),
+            str(len(long_duration_df)),
+            str(len(break_duration_df))
+        )
+    return [], [], '', '', '', ''  # Default return if no pathname matches
 
 @app.callback(
     Output('url', 'pathname'),
@@ -1201,15 +1212,7 @@ def redirect_to_employee_page(active_cell, selected_month):
     [Input('url', 'pathname'), 
      Input('break-month-dropdown', 'value')]
 )
-# @app.callback(
-#     [Output('employee-time-graph', 'figure'),
-#      Output('employee-duration-graph', 'figure'),
-#      Output('break-duration-graph', 'figure'),
-#      Output('employee-table', 'data')],
-#     [Input('url', 'pathname'), 
-#      Input('break-month-dropdown', 'value')]
-# )
-# #--------------------------------------------------
+
 def update_employee_graphs(pathname,month_name):
     if pathname.startswith('/employee/'):
         employee_name = pathname.split('/')[-1]
