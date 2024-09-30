@@ -36,11 +36,11 @@ hashed_secret_key = hashlib.sha256(random_secret_key).hexdigest()
 server = Flask(__name__)
 server.secret_key = hashed_secret_key
 
-username= os.getenv(database_username)
-password = os.getenv(password) 
-host = os.getenv(db_host)
-port =  os.getenv(db_port)
-database = os.getenv(database_name)
+username= os.getenv("database_username")
+password = os.getenv("password") 
+host = os.getenv("db_host")
+port =  os.getenv("db_port")
+database = os.getenv("database_name")
 # Construct the connection string
 database_url = f"postgresql://{username}:{password}@{host}:{port}/{database}"
 connection = connect_to_postgresql(database_url)
