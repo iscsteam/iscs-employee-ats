@@ -26,7 +26,8 @@ from dash import Dash, html
 from flask import Flask, jsonify
 from database_connection import connect_to_postgresql , get_table_data 
 import secrets
-import hashlib           
+import hashlib    
+
 # Generate a random 32-byte secret key
 random_secret_key = secrets.token_bytes(32)
 
@@ -310,6 +311,11 @@ def table_data_daily(employee_name, month_name):
 
     return table_month
 #----------------------------------------------------------
+#
+#HGGPIUSGFDPIU                                                OJSHDOFIHASDPIOFHOI
+#                     IHSGDOIFUGPISUGFPIUWS
+#                   ISJDHGPOUAHSDPGIOH[ASOD]
+#               kjhsdgfhsgfiSHDGF
 # Initialize the Dash app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True,server=server)
 #the over all graph according to months in main page
@@ -655,8 +661,6 @@ app.layout = html.Div(
     ]
 )
 
-
-           
 
 # Layout for the main dashboard page
 def main_page_layout():
@@ -1233,14 +1237,6 @@ def update_employee_graphs(pathname,month_name):
         return employee_time_fig, employee_duration_fig, employee_break_fig,employee_metrics_fig
     return {}, {},{},[]
 
-
-if __name__ == '__main__':
-    app.run_server(host='0.0.0.0', port=8050, debug=False)
-    
-
-
-
-
-
-
- 
+if __name__ == "__main__":
+    # Use Waitress to serve the Flask server with Dash app
+    serve(app.server, host='0.0.0.0', port=8050)
