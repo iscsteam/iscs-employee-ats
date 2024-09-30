@@ -24,15 +24,23 @@ import warnings
 warnings.filterwarnings("ignore")
 from dash import Dash, html
 from flask import Flask, jsonify
-from database_connection import connect_to_postgresql , get_table_data            
+from database_connection import connect_to_postgresql , get_table_data 
+import secrets
+import hashlib           
+# Generate a random 32-byte secret key
+random_secret_key = secrets.token_bytes(32)
 
+# Hash the random secret key using SHA256
+hashed_secret_key = hashlib.sha256(random_secret_key).hexdigest()
 # Create a Flask server instance
 server = Flask(__name__)
-username = "iscs_ats"
-password = "w2mrGcYWJLvxDfXgAhAZ1Q"
-host = "fleet-fish-5790.7s5.aws-ap-south-1.cockroachlabs.cloud"
-port = "26257"
-database = "ats_iscs"
+server.secret_key = hashed_secret_key
+
+username= os.getenv(database_username)
+password = os.getenv(password) 
+host = os.getenv(db_host)
+port =  os.getenv(db_port)
+database = os.getenv(database_name)
 # Construct the connection string
 database_url = f"postgresql://{username}:{password}@{host}:{port}/{database}"
 connection = connect_to_postgresql(database_url)
@@ -303,7 +311,7 @@ def table_data_daily(employee_name, month_name):
     return table_month
 #----------------------------------------------------------
 # Initialize the Dash app
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True,server=server)
 #the over all graph according to months in main page
 def cal_meantime(month_name):
     df2 = df1[df1["month_name"] == month_name]
@@ -881,7 +889,7 @@ def employee_page_layout(employee_name,table_data,
             # Condition 1: Time greater than 09:41:00 (tomato background)
             {
                 'if': {
-                    'filter_query': '{in_time} > "09:41:00"',
+                    'filter_query': '{in_time} >= "09:41:00"',
                     'column_id': 'in_time'
                 },
                 'backgroundColor': 'tomato',
@@ -1227,7 +1235,7 @@ def update_employee_graphs(pathname,month_name):
 
 
 if __name__ == '__main__':
-    app.run_server(host='0.0.0.0', port=8050, debug=True)
+    app.run_server(host='0.0.0.0', port=8050, debug=False)
     
 
 
