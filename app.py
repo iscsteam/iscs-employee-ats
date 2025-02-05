@@ -37,13 +37,18 @@ hashed_secret_key = hashlib.sha256(random_secret_key).hexdigest()
 server = Flask(__name__)
 server.secret_key = hashed_secret_key
 
-username= os.getenv("database_username")
-password = os.getenv("password") 
-host = os.getenv("db_host")
-port =  os.getenv("db_port")
-database = os.getenv("database_name")
+# username= os.getenv("database_username")
+# password = os.getenv("password") 
+# host = os.getenv("db_host")
+# port =  os.getenv("db_port")
+# database = os.getenv("database_name")
 
 
+username = "iscs_ats"
+password = "w2mrGcYWJLvxDfXgAhAZ1Q"
+host = "fleet-fish-5790.7s5.aws-ap-south-1.cockroachlabs.cloud"
+port = "26257"
+database = "ats_iscs"
 
 # Construct the connection string
 database_url = f"postgresql://{username}:{password}@{host}:{port}/{database}"
@@ -182,7 +187,7 @@ def process_employee_metrics(employee_name, month_name,return_only_graph=False):
     if return_only_graph:
         return bar_fig
     else:
-        return bar_fig, late_logins_df, late_logout_df, long_duration_df, break_duration_df, data1,no_of_absents,no_of_present
+        return bar_fig, late_logins_df, late_logout_df, long_duration_df, break_duration_df,data1,no_of_absents,no_of_present
 
 
 #####$break ---time graph-----------------------------------------------------------------------
