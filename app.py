@@ -165,16 +165,19 @@ def process_employee_metrics(employee_name, month_name,return_only_graph=False):
             'font': dict(size=24, family="Google Sans, Helvetica Neue, sans-serif")  # Stylish title font
         },
         xaxis=dict(
-            title="Metrics",
-            titlefont=dict(size=18),
+            #title=dict("Metrics",font=dict(size=18)), #changes made 
+            title={"text": "Metrics", "font": dict(size=18)},
+            #titlefont=dict(size=18),
             showgrid=True,  # Adding grid lines for x-axis
             gridcolor='#2d2d2d',  # Subtle grid color matching the theme
             tickangle=-45,  # Rotating the x-axis labels for better readability
             tickfont=dict(size=14, family="Google Sans, Helvetica Neue, sans-serif")  # Stylish axis font
         ),
         yaxis=dict(
-            title="Count",
-            titlefont=dict(size=18),
+            #title="Count",
+            #title=dict("Count",font=dict(size=18)), #changes made here
+            title={"text": "Count", "font": dict(size=18)},  # Correct way
+            #titlefont=dict(size=18),
             showgrid=True,  # Adding grid lines for y-axis
             gridcolor='#2d2d2d',  # Subtle grid color matching the theme
             tickfont=dict(size=14, family="Google Sans, Helvetica Neue, sans-serif")
