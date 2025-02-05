@@ -37,21 +37,19 @@ hashed_secret_key = hashlib.sha256(random_secret_key).hexdigest()
 server = Flask(__name__)
 server.secret_key = hashed_secret_key
 
-# username= os.getenv("database_username")
-# password = os.getenv("password") 
-# host = os.getenv("db_host")
-# port =  os.getenv("db_port")
-# database = os.getenv("database_name")
-username = "iscs_ats"
-password = "w2mrGcYWJLvxDfXgAhAZ1Q"
-host = "fleet-fish-5790.7s5.aws-ap-south-1.cockroachlabs.cloud"
-port = "26257"
-database = "ats_iscs"
+username= os.getenv("database_username")
+password = os.getenv("password") 
+host = os.getenv("db_host")
+port =  os.getenv("db_port")
+database = os.getenv("database_name")
+
+
+
 # Construct the connection string
 database_url = f"postgresql://{username}:{password}@{host}:{port}/{database}"
 connection = connect_to_postgresql(database_url)
 #----------------------
-df=get_table_data(connection,"employee_work_hours")
+df=get_table_data(connection,"employee_work_hours") 
 
 df1=df.copy()
 df1['mean_intime'] = pd.to_datetime(df1['mean_intime'], format='%H:%M').dt.time
@@ -119,12 +117,21 @@ def process_employee_metrics(employee_name, month_name,return_only_graph=False):
     break_duration_df = t3[t3['break_hours'] > pd.Timedelta(break_time_benchmark)]
     break_duration_df["break_hours"]= t3["break_hours"].apply(lambda x: str(x)[7:])
     t3["break_hours"]= t3["break_hours"].apply(lambda x: str(x)[7:])
+    attendence_table=get_table_data(connection, "attendance_table")
+    result_attendence=attendence_table.loc[(attendence_table["employee_name"] == employee_name) & (attendence_table["month_name"] == month_name)]
+    print(employee_name)
+    print(month_name)
+
+    no_of_absents=result_attendence["absent"].iloc[0] if not result_attendence.empty else "DATA NOT AVALIABLE"
+    no_of_present=result_attendence["present"].iloc[0] if not result_attendence.empty else "DATA NOT AVALIABLE"
 
     data1 = [
         {'Metric': 'No of  Late Logins', 'Value': f"{len(late_logins_df)} out of {len(t3)} days", 'Benchmark': f'after {login_benchmark} am'},
         {'Metric': 'No of Early Logouts', 'Value': f"{len(late_logout_df)} out of {len(t3)} days", 'Benchmark': f' before  {log_out_benchmark} pm'},
         {'Metric': 'No of Short Office Durations', 'Value': f"{len(long_duration_df)} out of {len(t3)} days", 'Benchmark': f' less than {durationoffice_benchmark} houres in office'},
-        {'Metric': 'No of Large Break Durations', 'Value': f"{len(break_duration_df)} out of {len(t3)} days", 'Benchmark': f'{break_time_benchmark}'}
+        {'Metric': 'No of Large Break Durations', 'Value': f"{len(break_duration_df)} out of {len(t3)} days", 'Benchmark': f'{break_time_benchmark}'},
+        {'Metric': 'No of Absents ', 'Value': f"{no_of_absents}", 'Benchmark': 'N/A'},
+        {'Metric': 'No of Presents', 'Value': f"{no_of_present}" ,'Benchmark': 'N/A'}
     ]
     x=["Late Logins","Early Logouts","No of Short  Office Durations","No of Large Break Durations"]
     y1=[len(late_logins_df),len(late_logout_df),len(long_duration_df),len(break_duration_df)]
@@ -175,7 +182,7 @@ def process_employee_metrics(employee_name, month_name,return_only_graph=False):
     if return_only_graph:
         return bar_fig
     else:
-        return bar_fig, late_logins_df, late_logout_df, long_duration_df, break_duration_df, data1
+        return bar_fig, late_logins_df, late_logout_df, long_duration_df, break_duration_df, data1,no_of_absents,no_of_present
 
 
 #####$break ---time graph-----------------------------------------------------------------------
@@ -818,7 +825,7 @@ def main_page_layout():
    #----------------------------------------------ojdfhgpjshgs-----------
 # Layout for employee-specific page
 def employee_page_layout(employee_name,table_data,
-                         late_logins_df,late_logout_df,long_duration_df,break_duration_df,data1): #late_logins_df late_logout_df long_duration_df,break_duration_df
+                         late_logins_df,late_logout_df,long_duration_df,break_duration_df,data1,no_of_absents,no_of_present): #late_logins_df late_logout_df long_duration_df,break_duration_df
     return html.Div(
         style={'background-color': '#1c1c1c', 'min-height': '100vh', 'padding': '20px'}, 
         children=[
@@ -1016,7 +1023,7 @@ def employee_page_layout(employee_name,table_data,
             ], id='large-breaks-box', style={'background-color': '#2e2e2e', 'padding': '20px', 'border-radius': '10px', 'width': '200px', 'margin': '10px'}),
         ], style={'display': 'flex', 'justify-content': 'center'}),
 
-        # Summary DataTable
+        # Summary DataTable  metriv value and benchmark table
         dash_table.DataTable(
             id='summary-data-table',  # Unique ID for the DataTable
             data=data1,
@@ -1149,11 +1156,12 @@ def display_page(pathname, search):
         table_data = table_data_daily(employee_name, default_month)  # Fetch table data for the employee and default month
 
         # Call the process_employee_metrics function to get metrics without returning the graph
-        _, late_logins_df, late_logout_df, long_duration_df, break_duration_df, data1 = process_employee_metrics(employee_name, default_month)
+        _, late_logins_df, late_logout_df, long_duration_df, break_duration_df, data1,no_of_absents,no_of_present= process_employee_metrics(employee_name,default_month)
 
         # Pass the data and metrics to employee_page_layout without the bar figure
-        return employee_page_layout(employee_name, table_data, late_logins_df, late_logout_df, long_duration_df, break_duration_df, data1)
+        return employee_page_layout(employee_name, table_data, late_logins_df, late_logout_df, long_duration_df, break_duration_df, data1,no_of_absents,no_of_present)
     else:
+        
         return main_page_layout()
 
 # Callback function to update the employee table when a new month is selected
@@ -1193,7 +1201,7 @@ def update_metrics_and_table(month_name, pathname):
         table_data = table_data_daily(employee_name, month_name)
 
         # Get the metrics based on the employee and month
-        _, late_logins_df, late_logout_df, long_duration_df, break_duration_df, data1 = process_employee_metrics(employee_name, month_name)
+        _, late_logins_df, late_logout_df, long_duration_df, break_duration_df, data1,no_of_absents,no_of_present= process_employee_metrics(employee_name, month_name) #,=
 
         return (
             table_data.to_dict('records'),
@@ -1245,3 +1253,4 @@ def update_employee_graphs(pathname,month_name):
 if __name__ == "__main__":
     # Use Waitress to serve the Flask server with Dash app
     serve(app.server, host='0.0.0.0', port=8050)
+    #app.run(debug=True, host="0.0.0.0", port=8050)

@@ -12,3 +12,6 @@ waitress
 pathlib
 statsmodels
 flask-login
+
+
+ 
