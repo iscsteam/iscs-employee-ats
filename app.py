@@ -1,5 +1,6 @@
 import os
 import numpy as np
+
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -20,6 +21,7 @@ import dash
 from pathlib import Path
 from statsmodels.nonparametric.smoothers_lowess import lowess
 import warnings
+from dateutil.relativedelta import relativedelta
 # Ignore all warnings
 warnings.filterwarnings("ignore")
 from dash import Dash, html
@@ -27,6 +29,7 @@ from flask import Flask, jsonify
 from database_connection import connect_to_postgresql , get_table_data 
 import secrets
 import hashlib    
+from datetime import datetime, timedelta
 
 # Generate a random 32-byte secret key
 random_secret_key = secrets.token_bytes(32)
@@ -48,15 +51,31 @@ database = os.getenv("database_name")
 database_url = f"postgresql://{username}:{password}@{host}:{port}/{database}"
 connection = connect_to_postgresql(database_url)
 #----------------------
-df=get_table_data(connection,"employee_work_hours") 
-
+df=get_table_data(connection,"employee_work_hours") #-----------
+df['month_year'] = pd.to_datetime(df['month_name'] + ' ' + df['year'].astype(str), format='%B %Y')
+# Step 2: Calculate cutoff date (6 months ago from today)
+cutoff_date = datetime.today() - relativedelta(months=8)
+# Step 3: Filter the DataFrame for last 6 months
+df = df[df['month_year'] >= cutoff_date]
+# Optional: Drop the helper column if you want
+df = df.drop(columns=['month_year'])
 df1=df.copy()
 df1['mean_intime'] = pd.to_datetime(df1['mean_intime'], format='%H:%M').dt.time
 df1['mean_outtime'] = pd.to_datetime(df1['mean_outtime'], format='%H:%M').dt.time
 df1['duration_in_office'] = pd.to_datetime(df1['duration_in_office'], format='%H:%M').dt.time
 df1['working_hours_duration'] = pd.to_datetime(df1['working_hours_duration'], format='%H:%M').dt.time
+#---------------------------------------------------------------------------------------------
 ##the daily logs table 
 daily_logs=get_table_data(connection,"employee_attendance_daily")
+daily_logs['attendance_date'] = pd.to_datetime(daily_logs['attendance_date'], format='%d-%m-%Y')
+# Step 2: Get the cutoff date for the last 6 months
+cutoff_date = datetime.today() - pd.DateOffset(months=7)
+# Step 3: Filter the DataFrame
+daily_logs = daily_logs[daily_logs['attendance_date'] >= cutoff_date]
+# Optional: Reset index if needed
+daily_logs = daily_logs.reset_index(drop=True)
+#----------------------------------------------------
+#filtering the data  for 6 months of data 
 t2=daily_logs.copy()
 def time_to_timedelta(time_str):
     hours, minutes = map(int, time_str.split(':'))
@@ -72,7 +91,7 @@ colummns_to_drop=["duration_in_office1","total_working_time1"]
 t2.drop(columns=colummns_to_drop,axis=1,inplace=True)
 t2["break_hours"] = t2["break_hours"].apply(lambda x: str(x)[7:])
 #---------------------------------------------------------------------------
-#t3=daily_logs.copy()
+
 def process_employee_metrics(employee_name, month_name,return_only_graph=False):
     t3=daily_logs.copy()
     t3 = t3[(t3["employee_name"] == employee_name) & (t3["month_name"] ==month_name)]
@@ -688,7 +707,7 @@ def main_page_layout():
     },
     children=[
         html.H1(
-            children='Employee Attendance Dashboard',
+            children='ISCS Employee Attendance Dashboard',
             style={
                 'textAlign': 'center', 
                 'color': '#2C3E50',  # Dark blue for prominence
@@ -698,7 +717,7 @@ def main_page_layout():
             }
         ),
         html.Div(
-            children='An interactive Dashboard for Tracking Employee Attendance',
+            children='An Interactive Dashboard for Tracking Employee Attendance',
             style={
                 'textAlign': 'center', 
                 'color': '#34495E',  # Slightly lighter blue-gray for a softer look
